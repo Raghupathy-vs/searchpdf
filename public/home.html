@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Searchable PDF Converter</title>
+<link rel="stylesheet" href="/home.css" />
+</head>
+<body>
+
+<main class="card">
+    <h1 id="welcomeUser"></h1>
+
+<h2>Searchable PDF Converter</h2>
+<p>Upload a scanned PDF and get a searchable PDF (uses OCR).</p>
+
+
+<form id="uploadForm">
+<input type="file" id="pdfFile" name="pdf" accept="application/pdf" required />
+<button type="submit" id="convert">Convert</button>
+</form>
+
+
+<div id="status"></div>
+<div id="result"></div>
+
+</main>
+
+<a id="downloadBtn" class="btn-download" style="display:none;" download>
+  Download PDF Here
+</a>
+
+<script>
+
+const form = document.getElementById("uploadForm");
+const fileInput = document.getElementById("pdfFile");
+const status = document.getElementById("status");
+const result = document.getElementById("result");
+const downloadBtn = document.getElementById("downloadBtn");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (!fileInput.files.length) return;
+  status.textContent = "Converting...";
+  downloadBtn.style.display = "none";  
+  result.innerHTML = "";
+
+  const fd = new FormData();
+fd.append("pdfFile", fileInput.files[0]);
+
+  try {
+    const res = await fetch("/convert", { method: "POST", body: fd });
+    const data = await res.json();
+
+if (data.success) {
+  status.textContent = "Conversion complete!";
+  downloadBtn.href = data.downloadUrl;
+  downloadBtn.style.display = "block";
+} else {
+  status.textContent = "Conversion failed!";
+  result.textContent = data.message;
+}
+  } catch (err) {
+    status.textContent = "Error: " + err.message;
+  }
+});
+
+
+</script>
+</body>
+</html>
